@@ -1,0 +1,25 @@
+[package]
+name = "rust_fps_net"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+bevy = { version = "0.14.2"}
+bevy_rapier3d = { version = "0.27.0", features = ["simd-stable"] }
+bevy_renet = "2.0.0"
+renet = "1.1.0"
+serde = { version = "1", features = ["derive"] }
+bincode = "2.0.1"
+rand = "0.9.2"
+
+[profile.dev]
+# Disable full LTO in dev to avoid creating many object files. Keep fast builds.
+lto = false
+codegen-units = 1
+
+[profile.release]
+# Keep LTO for release builds for performance, but reduce codegen units to lower
+# the number of object files passed to the MSVC linker which has a 65535 object limit.
+lto = "thin"
+codegen-units = 1
