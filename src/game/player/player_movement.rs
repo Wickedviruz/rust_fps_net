@@ -21,6 +21,9 @@ pub fn update_movement_input(
     if keys.pressed(KeyCode::KeyD){
         input.movement.y += 1.;
     }
+
+    input.jump = keys.pressed(KeyCode::Space);
+    input.crouch = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
 }
 
 pub fn update_movement(
@@ -30,8 +33,9 @@ pub fn update_movement(
     mut player_query : Query<(
         &mut Player, 
         &mut KinematicCharacterController,
-        Option<&KinematicCharacterControllerOutput
-    >)>,
+        Option<&KinematicCharacterControllerOutput>
+    )>,
+    mut cam_transforms: Query<&mut Transform, With<Camera>>,
 ){
     let camera = camera_query.get_single().unwrap();
 
@@ -40,6 +44,9 @@ pub fn update_movement(
             if output.grounded{
                 player.velocity = Vec3::ZERO;
             }
+            if input.jump && output.grounded {
+                player.velocity.y = 8.0;
+            } 
         }
         let camera_rotation_converted = -camera.rotation.y.to_radians() - 90.0_f32.to_radians();
 
@@ -51,11 +58,36 @@ pub fn update_movement(
         let right = Vec2::new(-forward.y,forward.x);
 
         if let Some(movement_direction) = (forward*input.movement.x + right*input.movement.y).try_normalize(){
-            player.velocity.x = movement_direction.x*player.speed;
-            player.velocity.z = movement_direction.y*player.speed;
+            let speed = player.current_speed(input.crouch);
+            player.velocity.x = movement_direction.x*speed;
+            player.velocity.z = movement_direction.y*speed;
         }
+
+        // Gravitation
         player.velocity.y -= player.gravity*time.timestep().as_secs_f32();
-        //delta
+        
+        let target_height = if input.crouch {
+            player.crouch_height
+        } else {
+            player.stand_height
+        };
+
+        // smooth transition (lerp)
+        player.eye_height = player.eye_height + (target_height - player.eye_height) * 10.0 * time.timestep().as_secs_f32();
+
+        // flytta kameran till rätt höjd
+        if let Ok(mut cam_transform) = cam_transforms.get_single_mut() {
+            cam_transform.translation.y = player.eye_height;
+        }
+
+        // collider offset (för att kännas lägre)
+        controller.offset = if input.crouch {
+            CharacterLength::Absolute(0.5)
+        } else {
+            CharacterLength::Absolute(0.01)
+        };
+
+        // Flytta spelaren
         controller.translation = Some(player.velocity*time.timestep().as_secs_f32());
     }
 }

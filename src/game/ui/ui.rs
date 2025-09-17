@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use crate::game::app_state::AppState;
 
+use super::crosshair;
+
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
@@ -11,6 +13,7 @@ impl Plugin for UiPlugin {
             .add_systems(Startup, setup_egui_theme)
             .add_systems(Update, main_menu_ui.run_if(in_state(AppState::MainMenu)))
             .add_systems(Update, pause_menu_ui.run_if(in_state(AppState::Paused)))
+            .add_systems(Update, crosshair::spawn_crosshair.run_if(in_state(AppState::InGame)))
             .add_systems(Update, toggle_pause);
     }
 }

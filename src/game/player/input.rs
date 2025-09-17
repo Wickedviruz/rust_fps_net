@@ -4,4 +4,6 @@ use bevy::prelude::*;
 pub struct PlayerInput{
     //x component is forward and y direction is right
     pub movement : Vec2,
+    pub jump: bool,
+    pub crouch: bool,
 }
