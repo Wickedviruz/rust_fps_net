@@ -6,3 +6,4 @@ pub mod shooting;
 pub mod ui;
 pub mod window;
 pub mod math;
+pub mod app_state;

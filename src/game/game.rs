@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 
-use super::{level::level, player::player, ui::ui, window::window};
+use super::{level::level, player::player, ui::ui, window::window, cursor::cursor};
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
@@ -12,6 +12,7 @@ impl Plugin for GamePlugin {
             player::PlayerPlugin,
             window::WindowSettingsPlugin,
             ui::UiPlugin,
+            cursor::CursorPlugin,
         ));
     }
 }
